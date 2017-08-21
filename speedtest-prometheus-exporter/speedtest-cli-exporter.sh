@@ -54,11 +54,11 @@ function read_speedtest-cli {
         fi
         if [[ "${line}" =~ Download: ]]; then
             download_rate=`echo ${line} | cut -d: -f2 | sed -e 's/Mbits\/s//g' | tr -d '[:space:]'` 
-            echo "speedtest-cli{name=\"download\", category=\"bandwidth\", environment=\"${ENV}\"} ${download_rate}" >> ${PROM_TXT_COLLECTOR_FILE_TMP}
+            echo "speedtest_cli{name=\"download\", category=\"bandwidth\", environment=\"${ENV}\"} ${download_rate}" >> ${PROM_TXT_COLLECTOR_FILE_TMP}
         fi
         if [[ "${line}" =~ Upload: ]]; then
             upload_rate=`echo ${line} | cut -d: -f2 | sed -e 's/Mbits\/s//g' | tr -d '[:space:]'` 
-            echo "speedtest-cli{name=\"upload\", category=\"bandwidth\", environment=\"${ENV}\"} ${upload_rate}" >> ${PROM_TXT_COLLECTOR_FILE_TMP}
+            echo "speedtest_cli{name=\"upload\", category=\"bandwidth\", environment=\"${ENV}\"} ${upload_rate}" >> ${PROM_TXT_COLLECTOR_FILE_TMP}
         fi
     done
     cp  ${PROM_TXT_COLLECTOR_FILE_TMP} ${PROM_TXT_COLLECTOR_FILE}
