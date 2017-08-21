@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Parses speedtest-cli output and writes it to .prom files
-PROM_TXT_COLLECTOR_DIR=/run/shm/prometheus-text-collector
+PROM_TXT_COLLECTOR_DIR=/var/run/shm/prometheus-text-collector
 SPEEDTEST_CLI_PATH=/usr/local/bin/speedtest-cli
 
 function validate_parameters {
@@ -49,19 +49,20 @@ function read_speedtest-cli {
     $COMMAND | while read line
     do
         if [[ "${line}" =~ [0-9]*ms$ ]]; then
-            latency=`echo ${line} | egrep -o "([0-9])*\.[0-9]* ms$" | sed  -e 's/ms//g'`
-            echo "speedtest-cli{name=\"latency\", category=\"bandwidth\", environment=\"${ENV}\"} ${latency}" >> ${PROM_TXT_COLLECTOR_FILE_TMP}
+            latency=`echo ${line} | egrep -o "([0-9])*\.[0-9]* ms$" | sed  -e 's/ms//g' | tr -d '[:space:]'` 
+            echo "speedtest_cli{name=\"latency\", category=\"bandwidth\", environment=\"${ENV}\"} ${latency}" >> ${PROM_TXT_COLLECTOR_FILE_TMP}
         fi
         if [[ "${line}" =~ Download: ]]; then
-            download_rate=`echo ${line} | cut -d: -f2 | sed -e 's/Mbits\/s//g'` 
+            download_rate=`echo ${line} | cut -d: -f2 | sed -e 's/Mbits\/s//g' | tr -d '[:space:]'` 
             echo "speedtest-cli{name=\"download\", category=\"bandwidth\", environment=\"${ENV}\"} ${download_rate}" >> ${PROM_TXT_COLLECTOR_FILE_TMP}
         fi
         if [[ "${line}" =~ Upload: ]]; then
-            upload_rate=`echo ${line} | cut -d: -f2 | sed -e 's/Mbits\/s//g'` 
+            upload_rate=`echo ${line} | cut -d: -f2 | sed -e 's/Mbits\/s//g' | tr -d '[:space:]'` 
             echo "speedtest-cli{name=\"upload\", category=\"bandwidth\", environment=\"${ENV}\"} ${upload_rate}" >> ${PROM_TXT_COLLECTOR_FILE_TMP}
         fi
     done
     cp  ${PROM_TXT_COLLECTOR_FILE_TMP} ${PROM_TXT_COLLECTOR_FILE}
+    rm -f ${PROM_TXT_COLLECTOR_FILE_TMP}
 }
 
 
