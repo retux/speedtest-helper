@@ -21,9 +21,10 @@ class Muestra:
 	def __init__(self):
 		self.timestamp = None
 		self.Download = None
+        self.DownloadUnit = None
 		self.Upload = None
+        self.UploadUnit = None
 		self.Url = None
-		self.Unit = None
 
 
 def main(argv):
@@ -86,13 +87,15 @@ def ParseStdin(file, tipo):
 			for cada in splitted:
 				if ( re.search(r"[0-9]", cada) ):
 					miMuestra.Download = cada.strip()
+				if ( re.search(r"bit", cada) ):
+					miMuestra.DownloadUnit = cada.strip()
 		if ( re.search(r"[Uu]pload:", line) and re.search(r"[0-9]", line) ):
 			splitted = line.split(' ')
 			for cada in splitted:
 				if ( re.search(r"[0-9]", cada) ):
 					miMuestra.Upload = cada.strip()
-				if ( re.search(r"bits/s", cada) ):
-					miMuestra.Unit = cada.strip()
+				if ( re.search(r"bit", cada) ):
+					miMuestra.UploadUnit = cada.strip()
 
 		if ( re.search(r"[Ss]hare", line) and re.search(r"http:", line) ):
 			splitted = line.split(' ')
@@ -113,14 +116,14 @@ def ParseStdin(file, tipo):
 
 
 def Dump2Stdout (file, miMuestra):
-	print str(miMuestra.timestamp) + ';' + miMuestra.Download + ';' + miMuestra.Upload + ';' + miMuestra.Unit + ';' + miMuestra.Url
+	print str(miMuestra.timestamp) + ';' + miMuestra.Download + ';' + miMuestra.DownloadUnit + ';' + miMuestra.Upload + ';' + miMuestra.UploadUnit + ';' + miMuestra.Url
 
 
 def Dump2Csv (file, miMuestra):
 	myfile = open (file, 'a')
 	#wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
 	wr = csv.writer(myfile)
-	data = [ miMuestra.timestamp, miMuestra.Download, miMuestra.Upload, miMuestra.Unit, miMuestra.Url ]
+	data = [ miMuestra.timestamp, miMuestra.Download, miMuestra.DownloadUnit, miMuestra.Upload, miMuestra.UploadUnit, miMuestra.Url ]
 	wr.writerow(data)
 	myfile.close()
 
@@ -133,14 +136,15 @@ def Dump2Sqlite (file, miMuestra):
 		cursor.execute('''CREATE TABLE IF NOT EXISTS 
 			speedtest	(	timestamp	INT PRIMARY KEY,
 					 	download 	TEXT,
+					 	downloadUnit 	TEXT,
 					 	upload 	TEXT,
-					 	unit		TEXT,
+					 	uploadUnit 	TEXT,
 						url		TEXT);''')
 
 		try:
 			with db:
-				db.execute('''INSERT INTO speedtest (timestamp, download, upload, unit, url)
-					VALUES(?,?,?,?,?)''', (miMuestra.timestamp,miMuestra.Download,miMuestra.Upload, miMuestra.Unit, miMuestra.Url))
+				db.execute('''INSERT INTO speedtest (timestamp, download, downloadUnit, upload, uploadUnit, url)
+					VALUES(?,?,?,?,?,?)''', (miMuestra.timestamp, miMuestra.Download, miMuestra.DownloadUnit, miMuestra.Upload, miMuestra.UploadUnit, miMuestra.Url))
 		except sqlite3.IntegrityError:
 			print('Record already exists')
 
@@ -193,6 +197,5 @@ def dump2Stdout(file):
 	
 if __name__ == "__main__":
    main(sys.argv[1:])
-
 
 
